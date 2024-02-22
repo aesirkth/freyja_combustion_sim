@@ -75,7 +75,7 @@ clear()
 
 T = RocketPySim.fafnir.average_thrust   #Average thrust estimation from rocketpy [N]
 Cd = 0.7                                # Estimation for initial guess
-D = 3*pow(10,-3)                      # Diameter of a single orifice [mm] 
+D = 1.2*pow(10,-3)                      # Diameter of a single orifice [mm] 
 L = 15                                  # Length of the injector [mm]
 ch_param = 0.75                         # Choking parameter, used in the residence time formula (Need to verify)
 A = pow(D,2)/4 * math.pi                # Area of a single injector orifice [mm2]
@@ -151,13 +151,14 @@ m_fuel_dot = 2*math.pi*grain_length*D/2 * density_fuel * r_dot
 
 # Regression rate calculation (fuel mass flow rate calculation)
 while m_fuel_dot <= mass_fu_target or G_Ox >= 700:  # Condition to find the needed mass flow rate and to not exceed the mass flux limit 
-   
-    A_port = A_port+0.00000001                      # Iteration of port area to accomodate the mass flux 
+    if G_Ox <= 700:
+        grain_length = grain_length + 0.001
+    else:
+        A_port = A_port+0.00000001                      # Iteration of port area to accomodate the mass flux 
     
     D = math.sqrt(A_port/math.pi * 4)               # Recalculation of diameter with new area
     G_Ox = m_dyer_dot/A_port                        # Calculation of mass flux
     r_dot = a * G_Ox**n                             # Burn rate estimation
-    print(G_Ox)
     m_fuel_dot = math.pi*grain_length*D * density_fuel * r_dot      # Mass flow rate calculation
     
     
@@ -173,6 +174,8 @@ print("Area needed for the proper mass flux", A_port*10**6,"[mm^2] \n")
 print("Diameter needed for the proper mass flux", D*1000,"[mm] \n")
 print("Length of the fuel grain neeeded", grain_length*100,"[cm] \n")
 print("Mass flux",G_Ox, "[kg/(s*m^2)] \n")
+
+
 
 print("OF ratio", m_dyer_dot/m_fuel_dot)
 
