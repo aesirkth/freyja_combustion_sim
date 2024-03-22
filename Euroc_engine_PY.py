@@ -75,20 +75,22 @@ clear()
 
 T = RocketPySim.fafnir.average_thrust   #Average thrust estimation from rocketpy [N]
 Cd = 0.7                                # Estimation for initial guess
-D = 1.2*pow(10,-3)                      # Diameter of a single orifice [mm] 
+D = 1.5*pow(10,-3)                      # Diameter of a single orifice [mm] 
 L = 15                                  # Length of the injector [mm]
 ch_param = 0.75                         # Choking parameter, used in the residence time formula (Need to verify)
 A = pow(D,2)/4 * math.pi                # Area of a single injector orifice [mm2]
-P1 = 45*pow(10,5)                       # Pressure at the injector [Pa]
-P2 = 25*pow(10,5)                       # Pressure in the chamber  [Pa]
+T_prop = 293                            # Temperature of the propellant and fuel (For CEA) [K]
+DeltaP_Tank= 5*pow(10,5)                 # Pressure drop between tank and injector -> Assumed could be calculated as particular energy losses at corners and lenght energy losses
+DeltaP_Injector= 20*pow(10,5)            # Pressure drop between injector and combustion chamber
+P1= 45*pow(10,5)                         # Pressure at the injector [Pa]
+P2 = P1-DeltaP_Injector                 # Pressure in the chamber  [Pa]
 P_atm = 101325                          # Atmospheric pressure [Pa]
 g = 9.81                                # Gravitational constant 
 density_fuel = 1115                     # Density of the ABS used [kg/m3]
 A_e = 798.076*10**-6                    # Exit area of no.76 #29 nozzle [m2]
 A_t = 106.2889*10**-6                   # Throat area of no.76 #29 nozzle [m2]
 eps = A_e/A_t                           # Supersonic expansion ratio in the nozzle
-T_prop = 293                            # Temperature of the propellant and fuel (For CEA) [K]
-OF_init = 3                          # Initial Oxidizer to fuel ratio
+OF_init = 3                             # Initial Oxidizer to fuel ratio
 N = 0                                   # Initial number of the injector holes
 a=1.6567e-4                             # Ballisic coefficient (Mario Amaro calculation from https://doi.org/10.2514/6.2014-3751, fig.15 )
 n=0.56478                               # Ballisic coefficient (Mario Amaro calculation from https://doi.org/10.2514/6.2014-3751, fig.15 )
@@ -183,9 +185,70 @@ massFlow = m_dyer_dot+m_fuel_dot
 massFlowFuel = m_fuel_dot
 massFlowOx = m_dyer_dot
 
-#---------------------------------------------------------
 # Сombustion calc
 t, r, _ = combustionSimulation(D)
 rate = np.gradient(r, t)
-plotResults(t, rate, 'Regression rate (mm/s)')
 print("A total of", round(np.trapz(rate,x=t)*1000),"mm of wall radius were consumed over the burntime")
+
+def ChangeTempFixInjector(Temp_):
+    #############################
+    # Compares the initial calculated values: m_dyer_dot, m_fuel_dot, G_Ox, OF ratio and Thrust,
+    # with the values obtained for the same injector geometry with a different temperature
+    # Input: Temperature [K]
+    #############################
+
+    print("###########################################################")
+    print("Initial Values. T_initial:", T_prop)    
+    print("Oxidizer Mass flow rate with", N,"number of holes =", m_dyer_dot)
+    print("Fuel Mass flow rate with", N,"number of holes =", m_fuel_dot, "[kg/s]")
+    print("Mass flux",G_Ox, "[kg/(s*m^2)]") 
+    print("OF ratio", m_dyer_dot/m_fuel_dot)
+    print("A total of", round(np.trapz(rate,x=t)*1000),"mm of wall radius were consumed over the burntime")
+    print("Initial thrust", T)
+    print("###########################################################")
+
+    P1_= 45*pow(10,5)
+    P2_= P1_-DeltaP_Injector
+
+    #   DYER MODEL CALCULATION 
+
+    h1_ = props('H','P',P1_,'Q',0,'N2O') # Saturated liquid enthalpy
+    h2_ = props('H','P',P2_,'Q',0,'N2O') # Saturated liquid enthalpy
+    rho1_ = props('D','T',Temp_,'P',P1_,'N2O')
+    rho2_ = props('D','T',Temp_,'P',P2_,'N2O')
+    P_v_ = props('P','T',Temp_,'Q',1,'N2O') # Saturated vapor pressure
+    
+    m_hem_dot_ = N*Cd*A*rho2_*math.sqrt(2*(h1_-h2_)) # Equation for HEM mass flow rate, (2.50) from Waxman Doctoral thesis
+    m_spi_dot_ = N*Cd*A*math.sqrt(2*rho1_*(P1_-P2_)) #Equation for SPI mass flow rate, (2.17) from Waxman Doctoral thesis
+    k_ = math.sqrt((P1_-P2_)/(P_v_-P2_))
+    m_dyer_dot_ = ((k_/(1+k_)) * m_spi_dot_ + (1/(1+k_))*m_hem_dot_)
+
+    print("Oxidizer Mass flow rate with", N," number of holes and Temp:",Temp_,"ºC =", m_dyer_dot_)
+    
+    G_Ox_ = m_dyer_dot_/A_port
+    r_dot_ = a * G_Ox_**n    #Balistic coeff * (Oxidizer/unitArea)^2ndBalistic electronic
+    m_fuel_dot_ = 2*math.pi*grain_length*D/2 * density_fuel * r_dot_
+    print("Fuel Mass flow rate with", N,"number of holes =", m_fuel_dot_, "[kg/s]")
+    print("Mass flux",G_Ox_, "[kg/(s*m^2)]")
+    print("OF ratio", m_dyer_dot_/m_fuel_dot_)
+
+    
+    [P_e_,v_e_,T_c_] = CEA(Temp_,P2_/pow(10,5),eps,m_dyer_dot_/m_fuel_dot_)
+
+    t_, r_, _ = combustionSimulation(D)
+    rate_ = np.gradient(r_, t_)
+    
+    print("A total of", round(np.trapz(rate_,x=t_)*1000),"mm of wall radius were consumed over the burntime")
+    m_dot_target = T/v_e_ - (P_e - P_atm)*A_e/(v_e_)
+    m_dot_tot_ = m_fuel_dot_ + m_dyer_dot_
+    T_ = v_e_*m_dot_tot_ + (P_e_ - P_atm)*A_e
+    print("Modified thrust", T_)
+    print("###########################################################")
+    #plotResults(t_, rate_, 'Regression rate (mm/s)')
+    return
+
+ChangeTempFixInjector(298)
+
+#---------------------------------------------------------
+
+plotResults(t, rate, 'Regression rate (mm/s)')

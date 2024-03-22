@@ -20,7 +20,7 @@ nox_mass = 10
 ullage_mass = nox_mass * 0.15
 mass_flow = nox_mass / burn_time
 print(mass_flow)
-isp = 230
+isp = 190
 grain_length = 0.6
 nozzle_length = 0.10
 plumbing_length = 0.3
