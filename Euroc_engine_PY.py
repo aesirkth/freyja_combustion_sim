@@ -82,14 +82,28 @@ A = pow(D,2)/4 * math.pi                # Area of a single injector orifice [mm2
 T_prop = 293                            # Temperature of the propellant and fuel (For CEA) [K]
 DeltaP_Tank= 5*pow(10,5)                 # Pressure drop between tank and injector -> Assumed could be calculated as particular energy losses at corners and lenght energy losses
 DeltaP_Injector= 20*pow(10,5)            # Pressure drop between injector and combustion chamber
-P1= 45*pow(10,5)                         # Pressure at the injector [Pa]
+P1= 45*pow(10,5)                         # Pressure at the injector [Pa] Taken at 293 K After 5 Bar assumed drop in the line
 P2 = P1-DeltaP_Injector                 # Pressure in the chamber  [Pa]
 P_atm = 101325                          # Atmospheric pressure [Pa]
 g = 9.81                                # Gravitational constant 
 density_fuel = 1115                     # Density of the ABS used [kg/m3]
-A_e = 798.076*10**-6                    # Exit area of no.76 #29 nozzle [m2]
-A_t = 106.2889*10**-6                   # Throat area of no.76 #29 nozzle [m2]
+#D_t = 11.509375 * 10**-3                 # Throat diameter no.76 #29 nozzle [m2
+#D_e = 31.877 * 10**-3                  # Exit diameter no.76 #40 nozzle [m2]
+
+D_t = 15.875 * 10**-3                   # Throat diameter no.76 #40 nozzle [m2]
+D_e = 38.1 * 10**-3                     # Exit diameter no.76 #40 nozzle [m2]
+
+
+
+A_t = math.pi*(D_t/2)**2                # Throat area of no.76 #40 nozzle [m2]
+print(A_t)
+A_e = math.pi*(D_e/2)**2                # Exit area of no.76 #40 nozzle [m2]
+print(A_e)
+
+
 eps = A_e/A_t                           # Supersonic expansion ratio in the nozzle
+
+print(eps)
 OF_init = 3                             # Initial Oxidizer to fuel ratio
 N = 0                                   # Initial number of the injector holes
 a=1.6567e-4                             # Ballisic coefficient (Mario Amaro calculation from https://doi.org/10.2514/6.2014-3751, fig.15 )
@@ -117,6 +131,8 @@ A_port = ((D**2)/4) * math.pi
 
 ############################## ROUTINE START ###################################
 [P_e,v_e,T_c] = CEA(T_prop,P2/pow(10,5),eps,OF_init)
+
+m_dot_target = T/v_e - (P_e - P_atm)*A_e/(v_e)
 
 m_dot_target = T/v_e - (P_e - P_atm)*A_e/(v_e)
 mass_fu_target = m_dot_target / (OF_init + 1)

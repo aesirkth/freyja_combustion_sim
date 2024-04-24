@@ -20,7 +20,7 @@ nox_mass = 10
 ullage_mass = nox_mass * 0.15
 mass_flow = nox_mass / burn_time
 print(mass_flow)
-isp = 190
+isp = 180
 grain_length = 0.6
 nozzle_length = 0.10
 plumbing_length = 0.3
@@ -105,7 +105,7 @@ fins = freya.add_trapezoidal_fins(
 
 #freya.all_info()
 
-
+print(fafnir.average_thrust)
 
 #test_flight = Flight(rocket=freya, environment=env, rail_length=12, inclination=84, heading=0)
 #fafnir.all_info()

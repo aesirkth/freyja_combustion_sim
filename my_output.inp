@@ -1,0 +1,12 @@
+problem rocket frozen nfz=1
+   p(bar) = 25.00000
+   o/f = 2.95278
+   sup = 5.76000
+react  
+   fuel=C8H8,styrene wt=50.00000  t,k=298.00000 
+   fuel=C4H6,butadiene wt=15.00000  t,k=298.00000 
+   fuel=C3H3N1 wt=35.00000  t,k=298.00000 h,kj/mol=126.40000 C 3 H 3 N 1 
+   ox=N2O wt=100.00000  t,k=298.00000 
+output trans
+   plot p t ispfz ivacfz m mw cp gam o/f cffz rho son machfz phi h cond pran ae pip
+end
