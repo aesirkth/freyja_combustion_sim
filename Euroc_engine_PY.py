@@ -52,16 +52,12 @@ def plotResults(t, rate, ylab):
     plt.show()
 
 
-clear = lambda: os.system('cls')
-clear()
-
-
 ############################## INITIAL DATA ###################################
 
 #   ROCKET PY INITIAL DATA (CHANGE IT IN THE ROCKET PY SIM IF YOU WANT DIFFERENT THRUST ESTIMATION)
 # Define tank geometry
 #tank_radius = 150 / 2000
-#tank_length = 0.75
+#tank_length = 0.7
 
 # Define tank
 #burn_time = 7
@@ -80,9 +76,9 @@ L = 15                                  # Length of the injector [mm]
 ch_param = 0.75                         # Choking parameter, used in the residence time formula (Need to verify)
 A = pow(D,2)/4 * math.pi                # Area of a single injector orifice [mm2]
 T_prop = 293                            # Temperature of the propellant and fuel (For CEA) [K]
-DeltaP_Tank= 5*pow(10,5)                 # Pressure drop between tank and injector -> Assumed could be calculated as particular energy losses at corners and lenght energy losses
-DeltaP_Injector= 20*pow(10,5)            # Pressure drop between injector and combustion chamber
-P1= 45*pow(10,5)                         # Pressure at the injector [Pa] Taken at 293 K After 5 Bar assumed drop in the line
+DeltaP_Tank= 5*pow(10,5)                # Pressure drop between tank and injector -> Assumed could be calculated as particular energy losses at corners and lenght energy losses
+DeltaP_Injector= 20*pow(10,5)           # Pressure drop between injector and combustion chamber
+P1= 45*pow(10,5)                        # Pressure at the injector [Pa] Taken at 293 K After 5 Bar assumed drop in the line
 P2 = P1-DeltaP_Injector                 # Pressure in the chamber  [Pa]
 P_atm = 101325                          # Atmospheric pressure [Pa]
 g = 9.81                                # Gravitational constant 
@@ -131,7 +127,6 @@ A_port = ((D**2)/4) * math.pi
 
 ############################## ROUTINE START ###################################
 [P_e,v_e,T_c] = CEA(T_prop,P2/pow(10,5),eps,OF_init)
-
 m_dot_target = T/v_e - (P_e - P_atm)*A_e/(v_e)
 
 m_dot_target = T/v_e - (P_e - P_atm)*A_e/(v_e)
