@@ -100,12 +100,20 @@ fins = freya.add_trapezoidal_fins(
     position=2.7,
     sweep_angle=25
 )
-
-# freya.draw()
+freya.draw()
 
 #freya.all_info()
 
-print(fafnir.average_thrust)
+#print(fafnir.average_thrust)
 
-#test_flight = Flight(rocket=freya, environment=env, rail_length=12, inclination=84, heading=0)
+test_flight = Flight(rocket=freya, environment=env, rail_length=12, inclination=84, heading=0)
 #fafnir.all_info()
+
+rail_exit_velocity = test_flight.out_of_rail_velocity
+print(f"Rail Exit Velocity: {rail_exit_velocity} m/s")
+
+apogee = test_flight.apogee
+print(f"Apogee: {apogee} m")
+
+max_speed = test_flight.max_speed
+print(f"Max Speed: {max_speed} m/s")

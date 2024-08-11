@@ -134,11 +134,6 @@ mass_fu_target = m_dot_target / (OF_init + 1)
 mass_ox_target = mass_fu_target* OF_init
 
 
-#print("Target mass flow rate", m_dot_target,"\n")
-#print("Target fuel mass flow rate", mass_fu_target,"\n")
-#print("Target ox mass flow rate", mass_ox_target,"\n")
-
-
 m_dyer_dot = 0
 while m_dyer_dot <= mass_ox_target:
     N = N+1
@@ -154,7 +149,6 @@ while m_dyer_dot <= mass_ox_target:
     m_spi_dot = N*Cd*A*math.sqrt(2*rho1*(P1-P2)) #Equation for SPI mass flow rate, (2.17) from Waxman Doctoral thesis
     k = math.sqrt((P1-P2)/(P_v-P2))
     m_dyer_dot = ((k/(1+k)) * m_spi_dot + (1/(1+k))*m_hem_dot)
-
 print("Oxidizer Mass flow rate with", N,"number of holes =", m_dyer_dot)
 
 
@@ -187,14 +181,14 @@ print("Area needed for the proper mass flux", A_port*10**6,"[mm^2] \n")
 print("Diameter needed for the proper mass flux", D*1000,"[mm] \n")
 print("Length of the fuel grain neeeded", grain_length*100,"[cm] \n")
 print("Mass flux",G_Ox, "[kg/(s*m^2)] \n")
-
-
-
 print("OF ratio", m_dyer_dot/m_fuel_dot)
 
 massFlow = m_dyer_dot+m_fuel_dot
 massFlowFuel = m_fuel_dot
 massFlowOx = m_dyer_dot
+
+Isp = T/massFlow/g
+print("Isp:", Isp)
 
 # Сombustion calc
 t, r, _ = combustionSimulation(D)
